@@ -43,4 +43,3 @@ if model_fr:
     print_coeffs("FR", model_fr.coef_)
 
 
-Add main calibration script
