@@ -15,7 +15,7 @@ def choisir_fichier_excel():
 chemin_fichier = choisir_fichier_excel()
 df = pd.read_excel(chemin_fichier)
 
-# Variables explicatives : F1 à F8 + NIR
+# Variables : F1 à F8 + NIR
 X_data = df[["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "NIR"]].values
 X = np.hstack([np.ones((X_data.shape[0], 1)), X_data])  # Ajout de l'intercept
 
