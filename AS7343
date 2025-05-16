@@ -1,0 +1,44 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
+
+
+def choisir_fichier_excel():
+    root = Tk()
+    root.withdraw()
+    fichier = askopenfilename(title="Sélectionner un fichier Excel", filetypes=[("Fichiers Excel", "*.xlsx")])
+    return fichier
+
+# Chargement du fichier
+chemin_fichier = choisir_fichier_excel()
+df = pd.read_excel(chemin_fichier)
+
+# Entrées spectrales : 11 canaux visibles (F1, F2, FZ, F3, F4, FY, FXL, F6, F7, F8)
+X_data = df[["F1", "F2", "FZ", "F3", "F4", "FY", "FXL", "F6", "F7", "F8"]].values
+X = np.hstack([np.ones((X_data.shape[0], 1)), X_data])  # Ajout de l’intercept manuellement
+
+# Cibles à prédire
+y_g = df["PPFD-G"].values
+y_b = df["PPFD-B"].values
+y_r = df["PPFD-R"].values
+y_y = df["PPFD-Y"].values  # Y = Far-red dans ton cas, renommé ici depuis "FR"
+
+# Régressions
+model_g = LinearRegression(fit_intercept=False).fit(X, y_g)
+model_b = LinearRegression(fit_intercept=False).fit(X, y_b)
+model_r = LinearRegression(fit_intercept=False).fit(X, y_r)
+model_y = LinearRegression(fit_intercept=False).fit(X, y_y)
+
+# Affichage formaté pour C++
+def print_coeffs(name, model, y_target):
+    r2 = model.score(X, y_target)
+    print(f"\n// R² for {name}: {r2:.4f}")
+    print(f"const float coeffs{name}[{len(model.coef_)}] = {{")
+    print(",\n".join([f"  {v:.6f}" for v in model.coef_]) + "\n}; // Intercept, F1, F2, FZ, F3, F4, FY, FXL, F6, F7, F8")
+
+print_coeffs("G", model_g, y_g)
+print_coeffs("B", model_b, y_b)
+print_coeffs("R", model_r, y_r)
+print_coeffs("Y", model_y, y_y)
